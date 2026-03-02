@@ -1,0 +1,53 @@
+---
+- name: Ensure directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - "{{ ssl_cert_path }}"
+    - "{{ ssl_key_path }}"
+
+- name: Generate Private Key
+  community.crypto.openssl_privatekey:
+    path: "{{ ssl_key_path }}/{{ ssl_cert_name }}.key"
+    size: 4096
+    type: RSA
+    mode: '0600'
+
+- name: Generate CSR with v3 extensions
+  community.crypto.openssl_csr:
+    path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.csr"
+    privatekey_path: "{{ ssl_key_path }}/{{ ssl_cert_name }}.key"
+    common_name: "{{ ssl_common_name }}"
+    organization_name: "{{ ssl_org_name }}"
+    country_name: "{{ ssl_country }}"
+    state_or_province_name: "{{ ssl_state }}"
+    locality_name: "{{ ssl_locality }}"
+    subject_alt_name: "{{ (ssl_dns_alt_names | map('regex_replace', '^', 'DNS:') | list) + (ssl_ip_alt_names | map('regex_replace', '^', 'IP:') | list) }}"
+    key_usage:
+      - digitalSignature
+      - keyEncipherment
+    extended_key_usage:
+      - serverAuth
+
+- name: Generate Self-Signed Certificate
+  community.crypto.x509_certificate:
+    path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.crt"
+    csr_path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.csr"
+    privatekey_path: "{{ ssl_key_path }}/{{ ssl_cert_name }}.key"
+    provider: selfsigned
+    selfsigned_not_after: "{{ ssl_valid_days }}"
+    mode: '0644'
+
+- name: Combine Key and Cert using shell
+  ansible.builtin.shell: |
+    cat {{ ssl_key_path }}/{{ ssl_cert_name }}.key {{ ssl_cert_path }}/{{ ssl_cert_name }}.crt > {{ ssl_cert_path }}/{{ ssl_cert_name }}.pem
+    chmod 600 {{ ssl_cert_path }}/{{ ssl_cert_name }}.pem
+  args:
+    creates: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.pem" 
+
+- name: Cleanup CSR file
+  file:
+    path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.csr"
+    state: absent

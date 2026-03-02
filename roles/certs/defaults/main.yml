@@ -1,0 +1,19 @@
+---
+ssl_cert_path: "/root/certs"
+ssl_key_path: "/root/private"
+ssl_cert_name: "haproxy"
+
+ssl_common_name: "haproxy-vmware"
+ssl_org_name: "PT. Adalah Pokoknya"
+ssl_country: "ID"
+ssl_state: "Jawa Barat"
+ssl_locality: "Depok"
+
+# v3 Extensions
+ssl_dns_alt_names:
+  - "haproxy-vmware"
+ssl_ip_alt_names:
+  - "10.10.51.235"
+  - "10.10.3.201"
+
+ssl_valid_days: "+365d"

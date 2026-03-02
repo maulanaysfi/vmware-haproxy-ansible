@@ -1,0 +1,23 @@
+[req]
+default_bits       = 2048
+distinguished_name = req_distinguished_name
+req_extensions     = v3_req
+x509_extensions    = v3_req
+prompt             = no
+
+[req_distinguished_name]
+countryName                = ID
+stateOrProvinceName        = Jawa Barat
+localityName               = Depok
+organizationName           = PT. Adalah Pokoknya
+commonName                 = haproxy-vmware
+
+[v3_req]
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1   = haproxy-vmware
+IP.1    = 10.10.51.235
+IP.2    = 10.10.3.201
