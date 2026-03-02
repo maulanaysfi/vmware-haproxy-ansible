@@ -1,0 +1,6 @@
+[Match]
+Path=pci-0000:03:00.0
+
+[Link]
+Name=management
+AlternativeNamesPolicy=none

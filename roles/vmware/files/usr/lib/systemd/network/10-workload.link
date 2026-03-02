@@ -1,0 +1,6 @@
+[Match]
+Path=pci-0000:0b:00.0
+
+[Link]
+Name=workload
+AlternativeNamesPolicy=none

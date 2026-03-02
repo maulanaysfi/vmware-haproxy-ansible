@@ -59,3 +59,6 @@
     state: directory
     owner: haproxy
     mode: '0755'
+
+- name: Install inotify-tools
+  command: tdnf install inotify-tools -y

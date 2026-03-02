@@ -1,0 +1,136 @@
+---
+- name: Create /etc/vmware
+  file:
+    path: /etc/vmware
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+
+- name: Create /var/lib/vmware
+  file:
+    path: /var/lib/vmware
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+
+- name: Copy management network link configuration
+  copy:
+    src: files/usr/lib/systemd/network/10-management.link
+    dest: /usr/lib/systemd/network/10-management.link
+    owner: systemd-network
+    group: systemd-network
+    mode: "0644"
+
+- name: Copy workload network link configuration
+  copy:
+    src: files/usr/lib/systemd/network/10-workload.link
+    dest: /usr/lib/systemd/network/10-workload.link
+    owner: systemd-network
+    group: systemd-network
+    mode: "0644"
+
+- name: Copy frontend network link configuration
+  copy:
+    src: files/usr/lib/systemd/network/10-frontend.link
+    dest: /usr/lib/systemd/network/10-frontend.link
+    owner: systemd-network
+    group: systemd-network
+    mode: "0644"
+
+- name: Generate new initrd image containing our link files
+  shell:
+    cmd: /usr/bin/dracut --add network --rebuild /boot/initrd.img-$(uname -r)
+
+- name: Create anyip-routes service configuration file
+  copy:
+    src: files/etc/vmware/anyip-routes.cfg
+    dest: /etc/vmware/anyip-routes.cfg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create anyiproutectl script
+  copy:
+    src: files/var/lib/vmware/anyiproutectl.sh
+    dest: /var/lib/vmware/anyiproutectl.sh
+    owner: root
+    group: root
+    mode: "0744"
+
+- name: Create anyip-routes service
+  copy:
+    src: files/etc/systemd/system/anyip-routes.service
+    dest: /etc/systemd/system/anyip-routes.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable anyip-routes service
+  systemd:
+    name: anyip-routes
+    enabled: yes
+    daemon_reload: yes
+    state: stopped
+
+- name: Create route-table service configuration file
+  copy:
+    src: files/etc/vmware/route-tables.cfg
+    dest: /etc/vmware/route-tables.cfg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create routetablectl script
+  copy:
+    src: files/var/lib/vmware/routetablectl.sh
+    dest: /var/lib/vmware/routetablectl.sh
+    owner: root
+    group: root
+    mode: "0744"
+
+- name: Create route-tables service
+  copy:
+    src: files/etc/systemd/system/route-tables.service
+    dest: /etc/systemd/system/route-tables.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable route-tables service
+  systemd:
+    name: route-tables
+    enabled: yes
+    daemon_reload: yes
+    state: stopped
+
+- name: Copy frontend network configuration
+  copy:
+    src: files/etc/systemd/network/10-frontend.network
+    dest: /etc/systemd/network/10-frontend.network
+    owner: systemd-network
+    group: systemd-network
+    mode: "0644"
+
+- name: Copy management network configuration
+  copy:
+    src: files/etc/systemd/network/10-management.network
+    dest: /etc/systemd/network/10-management.network
+    owner: systemd-network
+    group: systemd-network
+    mode: "0644"
+
+- name: Copy workload network configuration
+  copy:
+    src: files/etc/systemd/network/10-workload.network
+    dest: /etc/systemd/network/10-workload.network
+    owner: systemd-network
+    group: systemd-network
+    mode: "0644"
+
+- name: Restart systemd-network service
+  systemd:
+    name: systemd-networkd
+    daemon_reload: yes
+    state: restarted

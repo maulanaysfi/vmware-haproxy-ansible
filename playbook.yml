@@ -5,7 +5,7 @@
   - role: common
   - role: haproxy
   - role: certs
+  - role: vmware
 #  - role: cloudinit
-#  - role: vmware
 #  - role: pki
 #  - role: sysprep
