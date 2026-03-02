@@ -41,7 +41,7 @@
     mode: '0644'
 
 - name: Combine Key and Cert using shell
-  ansible.builtin.shell: |
+  shell: |
     cat {{ ssl_key_path }}/{{ ssl_cert_name }}.key {{ ssl_cert_path }}/{{ ssl_cert_name }}.crt > {{ ssl_cert_path }}/{{ ssl_cert_name }}.pem
     chmod 600 {{ ssl_cert_path }}/{{ ssl_cert_name }}.pem
   args:
@@ -51,3 +51,14 @@
   file:
     path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.csr"
     state: absent
+
+- name: Restart haproxy.service
+  systemd:
+    name: haproxy
+    state: restarted
+
+- name: Restart dataplaneapi.service
+  systemd:
+    name: dataplaneapi
+    state: restarted
+

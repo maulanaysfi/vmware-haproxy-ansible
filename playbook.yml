@@ -3,9 +3,9 @@
   become: yes
   roles:
   - role: common
+  - role: haproxy
   - role: certs
 #  - role: cloudinit
-#  - role: haproxy
 #  - role: vmware
 #  - role: pki
 #  - role: sysprep

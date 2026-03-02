@@ -1,0 +1,69 @@
+# Copyright 2020 HAProxy Technologies
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- name: Download DataPlane API
+  get_url:
+    url: "{{ dataplaneapi_binary_url }}"
+    dest: /root/dataplaneapi_2.9.21_linux_amd64.rpm
+    mode: "0755"
+
+- name: Install latest HAProxy
+  shell: |
+    tdnf install haproxy -y
+
+- name: Install DataPlane API 2.9.21 
+  shell: |
+    rpm -Uvh /root/dataplaneapi_2.9.21_linux_amd64.rpm || true
+
+- name: Create Data Plane API configuration file
+  copy:
+    src: files/etc/haproxy/dataplaneapi.yml
+    dest: /etc/haproxy/dataplaneapi.yml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create HAProxy configuration file
+  copy:
+    src: files/etc/haproxy/haproxy.cfg
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Set Dataplane API default configuration dir
+  copy:
+    src: files/etc/default/dataplaneapi
+    dest: /etc/default/dataplaneapi
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Update HAProxy log level
+  replace:
+    path: /etc/haproxy/haproxy.cfg
+    regexp: 'log stdout format raw local0 debug'
+    replace: 'log stdout format raw local0 info'
+
+- name: Enable HAProxy service
+  systemd:
+    name: haproxy
+    enabled: yes
+    daemon_reload: yes
+
+- name: Enable Dataplane API service
+  systemd:
+    name: dataplaneapi
+    enabled: yes
+    daemon_reload: yes

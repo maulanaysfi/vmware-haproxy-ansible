@@ -40,3 +40,22 @@
     path: /etc/ssh/sshd_config
     regexp: '^.*?AddressFamily.*$'
     replace: 'AddressFamily inet'
+
+- name: Create new group haproxy
+  group:
+    name: haproxy
+
+- name: Create new user haproxy
+  user:
+    name: haproxy
+    system: yes
+    groups:
+      - users
+      - haproxy
+
+- name: Create HAproxy chroot dir
+  file:
+    path: /var/lib/haproxy
+    state: directory
+    owner: haproxy
+    mode: '0755'

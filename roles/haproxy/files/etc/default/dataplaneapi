@@ -1,0 +1,4 @@
+# Options for dataplaneapi
+
+# wrote by ansible
+SYSD_OPTIONS='-f /etc/haproxy/dataplaneapi.yml'

@@ -1,6 +1,6 @@
 ---
-ssl_cert_path: "/root/certs"
-ssl_key_path: "/root/private"
+ssl_cert_path: "/etc/haproxy/certs"
+ssl_key_path: "/etc/haproxy/private"
 ssl_cert_name: "haproxy"
 
 ssl_common_name: "haproxy-vmware"
