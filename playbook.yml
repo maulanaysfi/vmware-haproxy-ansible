@@ -1,0 +1,9 @@
+---
+- hosts: all
+  roles:
+  - role: common
+#  - role: cloudinit
+#  - role: haproxy
+#  - role: vmware
+#  - role: pki
+#  - role: sysprep
