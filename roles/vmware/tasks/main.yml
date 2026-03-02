@@ -44,8 +44,8 @@
     cmd: /usr/bin/dracut --add network --rebuild /boot/initrd.img-$(uname -r)
 
 - name: Create anyip-routes service configuration file
-  copy:
-    src: files/etc/vmware/anyip-routes.cfg
+  template:
+    src: frontend_vip.j2
     dest: /etc/vmware/anyip-routes.cfg
     owner: root
     group: root
@@ -75,8 +75,8 @@
     state: stopped
 
 - name: Create route-table service configuration file
-  copy:
-    src: files/etc/vmware/route-tables.cfg
+  template:
+    src: routetable.j2
     dest: /etc/vmware/route-tables.cfg
     owner: root
     group: root
@@ -106,31 +106,34 @@
     state: stopped
 
 - name: Copy frontend network configuration
-  copy:
-    src: files/etc/systemd/network/10-frontend.network
+  template:
+    src: frontend.j2
     dest: /etc/systemd/network/10-frontend.network
     owner: systemd-network
     group: systemd-network
     mode: "0644"
 
 - name: Copy management network configuration
-  copy:
-    src: files/etc/systemd/network/10-management.network
+  template:
+    src: management.j2
     dest: /etc/systemd/network/10-management.network
     owner: systemd-network
     group: systemd-network
     mode: "0644"
 
 - name: Copy workload network configuration
-  copy:
-    src: files/etc/systemd/network/10-workload.network
+  template:
+    src: workload.j2
     dest: /etc/systemd/network/10-workload.network
     owner: systemd-network
     group: systemd-network
     mode: "0644"
 
-- name: Restart systemd-network service
-  systemd:
-    name: systemd-networkd
-    daemon_reload: yes
-    state: restarted
+- name: Reboot system
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 0
+    post_reboot_delay: 0
+    test_command: whoami

@@ -1,6 +1,6 @@
 [Match]
-Path=pci-0000:13:00.0
+# pci@0000:1b:00.0
+Path=pci-0000:1b:00.0
 
 [Link]
 Name=frontend
-AlternativeNamesPolicy=none

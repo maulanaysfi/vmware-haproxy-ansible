@@ -12,8 +12,10 @@ ssl_locality: "Depok"
 # v3 Extensions
 ssl_dns_alt_names:
   - "haproxy-vmware"
-ssl_ip_alt_names:
-  - "10.10.51.235"
-  - "10.10.3.201"
+
+management_ipv4: 10.10.51.200
+workload_ipv4: 10.10.3.210
+frontend_ipv4: 10.10.2.220
 
 ssl_valid_days: "+365d"
+

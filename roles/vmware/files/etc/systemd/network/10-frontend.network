@@ -1,8 +1,0 @@
-[Match]
-Name=frontend
-
-[Network]
-
-[Address]
-#Address=10.10.2.114/24
-Address=10.20.1.10/24

@@ -24,7 +24,10 @@
     country_name: "{{ ssl_country }}"
     state_or_province_name: "{{ ssl_state }}"
     locality_name: "{{ ssl_locality }}"
-    subject_alt_name: "{{ (ssl_dns_alt_names | map('regex_replace', '^', 'DNS:') | list) + (ssl_ip_alt_names | map('regex_replace', '^', 'IP:') | list) }}"
+    subject_alt_name: >-
+      {{ (ssl_dns_alt_names | map('regex_replace', '^', 'DNS:') | list) +
+         ['IP:' + management_ipv4, 'IP:' + frontend_ipv4, 'IP:' + workload_ipv4] }}
+
     key_usage:
       - digitalSignature
       - keyEncipherment

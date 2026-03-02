@@ -1,3 +1,2 @@
 ---
-# as it uses systemd-sysctl. set this var so we can use for sysctl conf file value.
 sysctl_conf_file: "{{ '/etc/sysctl.d/99-sysctl.conf' if ansible_os_family == 'VMware Photon OS' else '/etc/sysctl.conf' }}"
