@@ -1,0 +1,19 @@
+---
+- name: Retrieve management MAC Address
+  debug: msg="{{ hostvars[inventory_hostname].ansible_default_ipv4.macaddress }}"
+
+- name: Retrieve frontend MAC Address
+  debug: msg="{{ hostvars[inventory_hostname].ansible_frontend.macaddress }}"
+
+- name: Retrieve management MAC Address
+  debug: msg="{{ hostvars[inventory_hostname].ansible_workload.macaddress }}"
+
+- name: Generate anyip-routes.cfg
+  template:
+    src: anyiproute.j2
+    dest: /etc/vmware/anyip-routes.cfg
+
+- name: Generate route-tables.cfg
+  template:
+    src: routetable.j2
+    dest: /etc/vmware/route-tables.cfg

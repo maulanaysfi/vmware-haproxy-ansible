@@ -1,0 +1,15 @@
+---
+management_ipv4: 10.10.51.200
+workload_ipv4: 10.10.3.210
+frontend_ipv4: 10.10.2.220
+
+management_ipv4_cidr: 10.10.51.200/24
+management_gtw: 10.10.51.254
+
+workload_ipv4_cidr: 10.10.3.210/24
+workload_gtw: 10.10.3.254
+
+frontend_ipv4_cidr: 10.10.2.220/24
+frontend_gtw: 10.10.2.254
+
+frontend_vip_cidr: 10.10.2.208/28
