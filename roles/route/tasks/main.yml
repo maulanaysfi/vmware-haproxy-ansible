@@ -13,6 +13,10 @@
     src: anyiproute.j2
     dest: /etc/vmware/anyip-routes.cfg
 
+- name: Pause for 20 seconds before generate route-tables
+  pause:
+    seconds: 20
+
 - name: Generate route-tables.cfg
   template:
     src: routetable.j2
