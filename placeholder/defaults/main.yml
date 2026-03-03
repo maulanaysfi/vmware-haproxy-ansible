@@ -1,0 +1,16 @@
+---
+management_ipv4: MANAGEMENT_IPV4
+workload_ipv4: WORKLOAD_IPV4
+frontend_ipv4: FRONTEND_IPV4
+
+management_ipv4_cidr: MANAGEMENT_IPV4_CIDR
+management_dns: MANAGEMENT_DNS
+management_gtw: MANAGEMENT_GTW
+
+workload_ipv4_cidr: WORKLOAD_IPV4_CIDR
+workload_gtw: WORKLOAD_GTW
+
+frontend_ipv4_cidr: FRONTEND_IPV4_CIDR
+frontend_gtw: FRONTEND_GTW
+
+frontend_vip_cidr: FRONTEND_VIP_CIDR
