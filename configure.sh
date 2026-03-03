@@ -3,7 +3,11 @@
 set -euo pipefail
 
 PLACEHOLDER_FILE=./placeholder/defaults/main.yml
-OUTPUT_FILE=./roles/vmware/defaults/main.yml
+OUTPUT_FILES=(
+    "./roles/vmware/defaults/main.yml"
+    "./roles/route/defaults/main.yml"
+    "./roles/certs/defaults/main.yml"
+)
 
 main() {
   read -p "[*] Management IPv4 (with CIDR, ex: 10.10.10.231/24): " MANAGEMENT_IPV4_CIDR
@@ -70,27 +74,33 @@ main() {
     esac
   done
 
-  echo "[+] Writing values to $OUTPUT_FILE"
+  echo "[+] Writing files..."
   generate_yml
   echo "[!] Done!"
 }
 
 generate_yml() {
-    cp "$PLACEHOLDER_FILE" "$OUTPUT_FILE"
+  for FILE in "${OUTPUT_FILES[@]}"; do
+    DIR=$(dirname "$FILE")
+    mkdir -p "$DIR"
+    cp "$PLACEHOLDER_FILE" "$FILE"
 
-    sed -i "s|MANAGEMENT_IPV4_CIDR|$MANAGEMENT_IPV4_CIDR|g" "$OUTPUT_FILE"
-    sed -i "s|MANAGEMENT_IPV4|$MANAGEMENT_IPV4|g" "$OUTPUT_FILE"
-    sed -i "s|MANAGEMENT_DNS|$MANAGEMENT_DNS|g" "$OUTPUT_FILE"
-    sed -i "s|MANAGEMENT_GTW|$MANAGEMENT_GTW|g" "$OUTPUT_FILE"
+    sed -i "s|MANAGEMENT_IPV4_CIDR|$MANAGEMENT_IPV4_CIDR|g" "$FILE"
+    sed -i "s|MANAGEMENT_IPV4|$MANAGEMENT_IPV4|g" "$FILE"
+    sed -i "s|MANAGEMENT_DNS|$MANAGEMENT_DNS|g" "$FILE"
+    sed -i "s|MANAGEMENT_GTW|$MANAGEMENT_GTW|g" "$FILE"
     
-    sed -i "s|WORKLOAD_IPV4_CIDR|$WORKLOAD_IPV4_CIDR|g" "$OUTPUT_FILE"
-    sed -i "s|WORKLOAD_IPV4|$WORKLOAD_IPV4|g" "$OUTPUT_FILE"
-    sed -i "s|WORKLOAD_GTW|$WORKLOAD_GTW|g" "$OUTPUT_FILE"
+    sed -i "s|WORKLOAD_IPV4_CIDR|$WORKLOAD_IPV4_CIDR|g" "$FILE"
+    sed -i "s|WORKLOAD_IPV4|$WORKLOAD_IPV4|g" "$FILE"
+    sed -i "s|WORKLOAD_GTW|$WORKLOAD_GTW|g" "$FILE"
     
-    sed -i "s|FRONTEND_IPV4_CIDR|$FRONTEND_IPV4_CIDR|g" "$OUTPUT_FILE"
-    sed -i "s|FRONTEND_IPV4|$FRONTEND_IPV4|g" "$OUTPUT_FILE"
-    sed -i "s|FRONTEND_GTW|$FRONTEND_GTW|g" "$OUTPUT_FILE"
-    sed -i "s|FRONTEND_VIP_CIDR|$FRONTEND_VIP_CIDR|g" "$OUTPUT_FILE"
+    sed -i "s|FRONTEND_IPV4_CIDR|$FRONTEND_IPV4_CIDR|g" "$FILE"
+    sed -i "s|FRONTEND_IPV4|$FRONTEND_IPV4|g" "$FILE"
+    sed -i "s|FRONTEND_GTW|$FRONTEND_GTW|g" "$FILE"
+    sed -i "s|FRONTEND_VIP_CIDR|$FRONTEND_VIP_CIDR|g" "$FILE"
+
+    echo "[!] Successfully wrote to $FILE"
+  done
 }
 
 main
