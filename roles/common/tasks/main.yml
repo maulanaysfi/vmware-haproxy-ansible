@@ -62,3 +62,9 @@
 
 - name: Install inotify-tools
   command: tdnf install inotify-tools -y
+
+- name: Disable and Stop Iptables service
+  systemd:
+    name: iptables
+    enabled: no
+    state: stopped
