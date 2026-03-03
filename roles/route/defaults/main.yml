@@ -1,9 +1,26 @@
 ---
+ssl_cert_path: "/etc/haproxy/certs"
+ssl_key_path: "/etc/haproxy/private"
+ssl_cert_name: "haproxy"
+
+ssl_common_name: "haproxy-vmware"
+ssl_org_name: "PT. Adalah Pokoknya"
+ssl_country: "ID"
+ssl_state: "Jawa Barat"
+ssl_locality: "Depok"
+
+# v3 Extensions
+ssl_dns_alt_names:
+  - "haproxy-vmware"
+
+ssl_valid_days: "+365d"
+
 management_ipv4: 10.10.51.200
 workload_ipv4: 10.10.3.210
 frontend_ipv4: 10.10.2.220
 
 management_ipv4_cidr: 10.10.51.200/24
+management_dns: 1.1.1.1
 management_gtw: 10.10.51.254
 
 workload_ipv4_cidr: 10.10.3.210/24
@@ -12,4 +29,4 @@ workload_gtw: 10.10.3.254
 frontend_ipv4_cidr: 10.10.2.220/24
 frontend_gtw: 10.10.2.254
 
-frontend_vip_cidr: 10.10.2.208/28
+frontend_vip_cidr: 10.10.2.128/28

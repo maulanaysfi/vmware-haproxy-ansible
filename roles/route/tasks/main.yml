@@ -12,12 +12,24 @@
   template:
     src: anyiproute.j2
     dest: /etc/vmware/anyip-routes.cfg
-
-- name: Pause for 20 seconds before generate route-tables
-  pause:
-    seconds: 20
+    owner: root
+    group: root
+    mode: "0644"
 
 - name: Generate route-tables.cfg
   template:
     src: routetable.j2
     dest: /etc/vmware/route-tables.cfg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Restart anyip-routes service
+  systemd:
+    name: anyip-routes
+    state: restarted
+
+- name: Restart route-tables service
+  systemd:
+    name: route-tables
+    state: restarted
