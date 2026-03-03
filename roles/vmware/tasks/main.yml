@@ -43,14 +43,6 @@
   shell:
     cmd: /usr/bin/dracut --add network --rebuild /boot/initrd.img-$(uname -r)
 
-- name: Create anyip-routes service configuration file
-  template:
-    src: frontend_vip.j2
-    dest: /etc/vmware/anyip-routes.cfg
-    owner: root
-    group: root
-    mode: "0644"
-
 - name: Create anyiproutectl script
   copy:
     src: files/var/lib/vmware/anyiproutectl.sh
@@ -73,14 +65,6 @@
     enabled: yes
     daemon_reload: yes
     state: stopped
-
-- name: Create route-table service configuration file
-  template:
-    src: routetable.j2
-    dest: /etc/vmware/route-tables.cfg
-    owner: root
-    group: root
-    mode: "0644"
 
 - name: Create routetablectl script
   copy:
