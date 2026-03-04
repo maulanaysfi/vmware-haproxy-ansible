@@ -1,0 +1,5 @@
+[HAproxy]
+https://packages.vmware.com/photon/5.0/photon_updates_5.0_x86_64/x86_64/haproxy-3.2.1-1.ph5.x86_64.rpm
+
+[DataplaneAPI]
+https://github.com/haproxytech/dataplaneapi/releases/download/v2.9.21/dataplaneapi_2.9.21_linux_amd64.rpm

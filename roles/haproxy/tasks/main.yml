@@ -1,45 +1,55 @@
-# Copyright 2020 HAProxy Technologies
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http:#www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 ---
-- name: Check if DataPlane API binary file exists
-  ansible.builtin.stat:
-    path: /root/dataplaneapi_2.9.21_linux_amd64.rpm
+
+- name: Check if HAProxy binary file exists
+  stat:
+    path: /root/haproxy-3.2.1-1.ph5.x86_64.rpm
   register: dataplaneapi_binary
 
-- name: Download DataPlane API
-  get_url:
-    url: "{{ dataplaneapi_binary_url }}"
-    dest: /root/dataplaneapi_2.9.21_linux_amd64.rpm
+- name: Copy HAProxy binary file
+  copy:
+    src: files/binary/haproxy-3.2.1-1.ph5.x86_64.rpm
+    dest: /root/haproxy-3.2.1-1.ph5.x86_64.rpm
+    owner: root
+    group: root
     mode: "0755"
   when: not dataplaneapi_binary.stat.exists
 
-- name: Install latest HAProxy
+- name: Install HAProxy 3.2.1
   shell: |
-    tdnf install haproxy -y
+    tdnf install /root/haproxy-3.2.1-1.ph5.x86_64.rpm -y
+
+- name: Delete default HAProxy configuration
+  file:
+    path: /etc/haproxy/haproxy.cfg
+    state: absent
+  when: ansible_default_ipv4.alias != "management"
+
+- name: Check if DataPlane API binary file exists
+  stat:
+    path: /root/dataplaneapi_2.9.21_linux_amd64.rpm
+  register: dataplaneapi_binary
+
+- name: Copy DataPlane API binary file
+  copy:
+    src: files/binary/dataplaneapi_2.9.21_linux_amd64.rpm
+    dest: /root/dataplaneapi_2.9.21_linux_amd64.rpm
+    owner: root
+    group: root
+    mode: "0755"
+  when: not dataplaneapi_binary.stat.exists
 
 - name: Install DataPlane API 2.9.21 
   shell: |
     rpm -Uvh /root/dataplaneapi_2.9.21_linux_amd64.rpm || true
 
 - name: Check if DataPlane API configuration file exists
-  ansible.builtin.stat:
+  stat:
     path: /etc/haproxy/dataplaneapi.yml
   register: dataplaneapi_config
 
-- name: Create Data Plane API configuration file
-  copy:
-    src: files/etc/haproxy/dataplaneapi.yml
+- name: Generate Data Plane API configuration file
+  template:
+    src: dataplaneapi.j2
     dest: /etc/haproxy/dataplaneapi.yml
     owner: root
     group: root
