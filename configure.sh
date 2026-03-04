@@ -5,11 +5,13 @@ set -euo pipefail
 PLACEHOLDER_FILE=./placeholder/defaults/main.yml
 OUTPUT_FILES=(
     "./roles/vmware/defaults/main.yml"
-    "./roles/route/defaults/main.yml"
+    "./roles/common/defaults/main.yml"
+    "./roles/sysprep/defaults/main.yml"
     "./roles/certs/defaults/main.yml"
 )
 
 main() {
+  read -e -p "[*] Machine hostname (FQDN): " HOSTNAME_FQDN
   read -e -p "[*] Management IPv4 (with CIDR, ex: 192.168.1.23/24): " MANAGEMENT_IPV4_CIDR
   MANAGEMENT_IPV4="${MANAGEMENT_IPV4_CIDR%/*}"
   MANAGEMENT_GTW_TMP="${MANAGEMENT_IPV4%.*}.254"
@@ -53,7 +55,7 @@ main() {
 
   
   # label if empty
-  vars="MANAGEMENT_IPV4_CIDR MANAGEMENT_DNS MANAGEMENT_GTW WORKLOAD_IPV4_CIDR WORKLOAD_GTW FRONTEND_IPV4_CIDR FRONTEND_GTW FRONTEND_VIP_CIDR MANAGEMENT_IPV4 WORKLOAD_IPV4 FRONTEND_IPV4"
+  vars="HOSTNAME_FQDN MANAGEMENT_IPV4_CIDR MANAGEMENT_DNS MANAGEMENT_GTW WORKLOAD_IPV4_CIDR WORKLOAD_GTW FRONTEND_IPV4_CIDR FRONTEND_GTW FRONTEND_VIP_CIDR MANAGEMENT_IPV4 WORKLOAD_IPV4 FRONTEND_IPV4"
   
   echo ""
   for var in $vars; do
@@ -65,6 +67,7 @@ main() {
   
   echo ""
   echo "[!] Review your configuration below."
+  echo "HOSTNAME_FQDN:          $HOSTNAME_FQDN"
   echo "MANAGEMENT_IPV4:        $MANAGEMENT_IPV4"
   echo "WORKLOAD_IPV4:          $WORKLOAD_IPV4"
   echo "FRONTEND_IPV4:          $FRONTEND_IPV4"
@@ -110,6 +113,7 @@ generate_yml() {
     mkdir -p "$DIR"
     cp "$PLACEHOLDER_FILE" "$FILE"
 
+    sed -i "s|HOSTNAME_FQDN|$HOSTNAME_FQDN|g" "$FILE"
     sed -i "s|MANAGEMENT_IPV4_CIDR|$MANAGEMENT_IPV4_CIDR|g" "$FILE"
     sed -i "s|MANAGEMENT_IPV4|$MANAGEMENT_IPV4|g" "$FILE"
     sed -i "s|MANAGEMENT_DNS|$MANAGEMENT_DNS|g" "$FILE"

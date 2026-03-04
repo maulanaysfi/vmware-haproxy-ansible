@@ -1,20 +1,39 @@
 ---
+# Common defaults
+sysctl_conf_file: "{{ '/etc/sysctl.d/99-sysctl.conf' if ansible_os_family == 'VMware Photon OS' else '/etc/sysctl.conf' }}"
+
+# CA Certs
+ca_cert_path: "/etc/haproxy/ca"
+ca_key_path: "/etc/haproxy/ca"
+ca_cert_name: "ca"
+ca_common_name: "MANAGEMENT_IPV4"
+ca_org_name: "VMware"
+ca_org_unit_name: "CAPV"
+ca_country: "US"
+ca_state: "California"
+ca_locality: "Palo Alto"
+
+ca_valid_days: "+3650d"
+
+# Server Certs
 ssl_cert_path: "/etc/haproxy/certs"
 ssl_key_path: "/etc/haproxy/private"
-ssl_cert_name: "haproxy"
-
-ssl_common_name: "haproxy-vmware"
-ssl_org_name: "PT. Adalah Pokoknya"
-ssl_country: "ID"
-ssl_state: "Jawa Barat"
-ssl_locality: "Depok"
+ssl_cert_name: "server"
+ssl_common_name: "HOSTNAME_FQDN"
+ssl_org_name: "VMware"
+ssl_org_unit_name: "CAPV"
+ssl_country: "US"
+ssl_state: "California"
+ssl_locality: "Palo Alto"
 
 # v3 Extensions
 ssl_dns_alt_names:
-  - "haproxy-vmware"
+  - "HOSTNAME_FQDN"
+  - "localhost"
 
-ssl_valid_days: "+365d"
+ssl_valid_days: "+1825d"
 
+hostname_fqdn: HOSTNAME_FQDN
 management_ipv4: MANAGEMENT_IPV4
 workload_ipv4: WORKLOAD_IPV4
 frontend_ipv4: FRONTEND_IPV4
