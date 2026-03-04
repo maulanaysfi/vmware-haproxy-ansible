@@ -57,13 +57,13 @@
   when: not dataplaneapi_config.stat.exists
 
 - name: Check if HAProxy configuration file exists
-  ansible.builtin.stat:
+  stat:
     path: /etc/haproxy/haproxy.cfg
   register: haproxy_config
 
 - name: Create HAProxy configuration file
-  copy:
-    src: files/etc/haproxy/haproxy.cfg
+  template:
+    src: haproxy.j2
     dest: /etc/haproxy/haproxy.cfg
     owner: root
     group: root

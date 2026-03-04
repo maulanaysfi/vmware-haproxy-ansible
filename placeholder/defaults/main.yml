@@ -33,6 +33,7 @@ ssl_dns_alt_names:
 
 ssl_valid_days: "+1825d"
 
+# addresses and routings
 hostname_fqdn: HOSTNAME_FQDN
 management_ipv4: MANAGEMENT_IPV4
 workload_ipv4: WORKLOAD_IPV4
@@ -49,3 +50,7 @@ frontend_ipv4_cidr: FRONTEND_IPV4_CIDR
 frontend_gtw: FRONTEND_GTW
 
 frontend_vip_cidr: FRONTEND_VIP_CIDR
+
+# dataplaneapi credentials
+dpapi_username: DPAPI_USERNAME
+dpapi_password_hash: DPAPI_PASSWORD_HASH

@@ -6,8 +6,8 @@ dataplaneapi:
     api_address: ""
     api_port: 0
   tls:
-    tls_host: 0.0.0.0
-    tls_port: 5555
+    tls_host: {{ management_ipv4 }}
+    tls_port: 5556
     tls_certificate: /etc/haproxy/certs/{{ ssl_cert_name }}.pem
     tls_key: /etc/haproxy/certs/{{ ssl_cert_name }}.pem
   scheme:

@@ -28,4 +28,4 @@ defaults 1
   timeout client-fin  10s
 
 userlist dataplaneapi
-  user dataplaneapi insecure-password wazowski
+  user {{ dpapi_username }} password {{ dpapi_password_hash }}

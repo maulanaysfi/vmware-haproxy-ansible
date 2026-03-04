@@ -8,6 +8,7 @@ OUTPUT_FILES=(
     "./roles/common/defaults/main.yml"
     "./roles/sysprep/defaults/main.yml"
     "./roles/certs/defaults/main.yml"
+    "./roles/haproxy/defaults/main.yml"
 )
 
 main() {
@@ -53,9 +54,12 @@ main() {
 
   read -e -p "[*] Frontend Virtual IP Network CIDR (ex: 10.10.30.192/28): " FRONTEND_VIP_CIDR
 
+  read -e -p "[*] Set HAproxy DataplaneAPI username: " DPAPI_USERNAME
+  echo "[!] You are entering password! Characters won't be displayed."
+  IFS= read -rsp "[*] Set HAproxy DataplaneAPI password: " DPAPI_PASSWORD
+  echo ""
   
-  # label if empty
-  vars="HOSTNAME_FQDN MANAGEMENT_IPV4_CIDR MANAGEMENT_DNS MANAGEMENT_GTW WORKLOAD_IPV4_CIDR WORKLOAD_GTW FRONTEND_IPV4_CIDR FRONTEND_GTW FRONTEND_VIP_CIDR MANAGEMENT_IPV4 WORKLOAD_IPV4 FRONTEND_IPV4"
+  vars="HOSTNAME_FQDN MANAGEMENT_IPV4_CIDR MANAGEMENT_DNS MANAGEMENT_GTW WORKLOAD_IPV4_CIDR WORKLOAD_GTW FRONTEND_IPV4_CIDR FRONTEND_GTW FRONTEND_VIP_CIDR MANAGEMENT_IPV4 WORKLOAD_IPV4 FRONTEND_IPV4 DPAPI_USERNAME DPAPI_PASSWORD"
   
   echo ""
   for var in $vars; do
@@ -65,6 +69,8 @@ main() {
     fi
   done
   
+  DPAPI_PASSWORD_HASH=$(mkpasswd -m sha-256 $DPAPI_PASSWORD)
+
   echo ""
   echo "[!] Review your configuration below."
   echo "HOSTNAME_FQDN:          $HOSTNAME_FQDN"
@@ -81,6 +87,8 @@ main() {
   echo "FRONTEND_GTW:           $FRONTEND_GTW"
   echo ""
   echo "FRONTEND_VIP_CIDR:      $FRONTEND_VIP_CIDR"
+  echo ""
+  echo "DATAPLANEAPI_USERNAME:  $DPAPI_USERNAME"
   echo ""
 
   while true; do
@@ -127,6 +135,9 @@ generate_yml() {
     sed -i "s|FRONTEND_IPV4|$FRONTEND_IPV4|g" "$FILE"
     sed -i "s|FRONTEND_GTW|$FRONTEND_GTW|g" "$FILE"
     sed -i "s|FRONTEND_VIP_CIDR|$FRONTEND_VIP_CIDR|g" "$FILE"
+
+    sed -i "s|DPAPI_USERNAME|$DPAPI_USERNAME|g" "$FILE"
+    sed -i "s|DPAPI_PASSWORD_HASH|$DPAPI_PASSWORD_HASH|g" "$FILE"
 
     echo "[!] Successfully wrote to $FILE"
   done
