@@ -1,4 +1,8 @@
 ---
+- name: Set hostname
+  shell: |
+    hostnamectl set-hostname "{{ hostname_fqdn }}"
+
 - name: Ensure net.ipv4.ip_forward sysctl is present
   sysctl:
     name: net.ipv4.ip_forward
