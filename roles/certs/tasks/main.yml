@@ -53,8 +53,6 @@
   shell: |
     cat {{ ssl_key_path }}/{{ ssl_cert_name }}.key {{ ssl_cert_path }}/{{ ssl_cert_name }}.crt > {{ ssl_cert_path }}/{{ ssl_cert_name }}.pem
     chmod 600 {{ ssl_cert_path }}/{{ ssl_cert_name }}.pem
-  args:
-    creates: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.pem" 
 
 - name: Restart haproxy.service
   systemd:

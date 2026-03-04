@@ -79,10 +79,20 @@
     pre_reboot_delay: 0
     post_reboot_delay: 0
     test_command: whoami
+  when: ansible_default_ipv4.alias != "management"
 
 - name: Regather facts to discover new interface names
   setup:
     gather_timeout: 30
+  when: ansible_default_ipv4.alias != "management"
+
+- name: Restart systemd-network service
+  systemd:
+    name: anyip-routes
+    enabled: yes
+    daemon_reload: yes
+    state: stopped
+  when: ansible_default_ipv4.alias == "management"
 
 - name: Retrieve management MAC Address
   debug: msg="{{ hostvars[inventory_hostname].ansible_default_ipv4.macaddress }}"
@@ -92,14 +102,6 @@
 
 - name: Retrieve management MAC Address
   debug: msg="{{ hostvars[inventory_hostname].ansible_workload.macaddress }}"
-
-#- name: Create anyip-routes service configuration file
-#  copy:
-#    src: files/etc/vmware/anyip-routes.cfg
-#    dest: /etc/vmware/anyip-routes.cfg
-#    owner: root
-#    group: root
-#    mode: "0644"
 
 - name: Create anyiproutectl script
   copy:
@@ -124,12 +126,6 @@
     daemon_reload: yes
     state: stopped
 
-#- name: Insert frontend VIP CIDR to anyip-routes.cfg
-#  lineinfile:
-#    path: /etc/vmware/anyip-routes.cfg
-#    line: "{{ frontend_vip_cidr }}"
-#    state: present
-
 - name: Generate frontend VIP CIDR to anyip-routes.cfg using template
   template:
     src: anyiproute.j2
@@ -146,14 +142,6 @@
 - name: Create symbolic link for anyiproutectl
   command: ln -sf /var/lib/vmware/anyiproutectl.sh /usr/local/bin/anyiproutectl
   when: not anyip_script.stat.exists
-
-#- name: Create route-table service configuration file
-#  copy:
-#    src: files/etc/vmware/route-tables.cfg
-#    dest: /etc/vmware/route-tables.cfg
-#    owner: root
-#    group: root
-#    mode: "0644"
 
 - name: Create routetablectl script
   copy:
@@ -177,16 +165,6 @@
     enabled: yes
     daemon_reload: yes
     state: stopped
-
-#- name: Insert routing table to route-tables.cfg
-#  blockinfile:
-#    path: /etc/vmware/route-tables.cfg
-#    block: |
-#      2,workload,{{ ansible_workload.macaddress }},{{ workload_ipv4_cidr }},{{ workload_gtw }}
-#      2,workload,{{ ansible_workload.macaddress }},{{ workload_ipv4_cidr }}
-#      3,frontend,{{ ansible_frontend.macaddress }},{{ frontend_ipv4_cidr }},{{ frontend_gtw }}
-#      3,frontend,{{ ansible_frontend.macaddress }},{{ frontend_ipv4_cidr }}
-#    create: true
 
 - name: Generate route table to route-tables.cfg using template
   template:
