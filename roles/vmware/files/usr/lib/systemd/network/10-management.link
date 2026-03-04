@@ -1,5 +1,6 @@
 [Match]
-# pci@0000:0b:00.0
+# workstation: pci@0000:03:00.0
+# vcenter: pci@0000:0b:00.0
 Path=pci-0000:0b:00.0
 
 [Link]
