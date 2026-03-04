@@ -1,0 +1,14 @@
+tambah:
+- FQDN config
+- CA Cert signed Certs
+- air gapped installation (store all packages locally)
+
+CA
+Issuer: C = US, ST = California, L = Palo Alto, O = VMware, OU = CAPV, CN = 10.10.51.242
+validity: 10y
+
+SERVER CRT
+Subject: C = US, ST = California, L = Palo Alto, O = VMware, OU = CAPV, CN = haproxy.vermil
+validity: 5y
+SAN:
+                DNS:haproxy.vermil, DNS:localhost, IP Address:127.0.0.1, IP Address:10.10.2.114, IP Address:10.10.51.242, IP Address:172.27.0.1
