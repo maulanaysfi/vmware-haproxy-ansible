@@ -68,21 +68,3 @@
     name: iptables
     enabled: no
     state: stopped
-
-- name: Check if anyiproutectl exists
-  ansible.builtin.stat:
-    path: /usr/local/bin/anyiproutectl
-  register: anyip_script
-
-- name: Flush existing VIP CIDR routes
-  command: anyiproutectl down
-  when: anyip_script.stat.exists
-
-- name: Check if routetablectl exists
-  ansible.builtin.stat:
-    path: /usr/local/bin/routetablectl
-  register: route_script
-
-- name: Flush existing routing tables
-  command: routetablectl down
-  when: route_script.stat.exists
