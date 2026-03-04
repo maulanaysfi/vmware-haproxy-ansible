@@ -88,10 +88,8 @@
 
 - name: Restart systemd-network service
   systemd:
-    name: anyip-routes
-    enabled: yes
-    daemon_reload: yes
-    state: stopped
+    name: systemd-networkd
+    state: restarted
   when: ansible_default_ipv4.alias == "management"
 
 - name: Retrieve management MAC Address
@@ -102,6 +100,24 @@
 
 - name: Retrieve management MAC Address
   debug: msg="{{ hostvars[inventory_hostname].ansible_workload.macaddress }}"
+
+- name: Check if anyiproutectl exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/anyiproutectl
+  register: anyip_script
+
+- name: Check if routetablectl exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/routetablectl
+  register: route_script
+
+- name: Flush existing VIP CIDR routes
+  command: anyiproutectl down
+  when: anyip_script.stat.exists
+
+- name: Flush existing routing tables
+  command: routetablectl down
+  when: route_script.stat.exists
 
 - name: Create anyiproutectl script
   copy:
@@ -133,11 +149,6 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Check if anyiproutectl exists
-  ansible.builtin.stat:
-    path: /usr/local/bin/anyiproutectl
-  register: anyip_script
 
 - name: Create symbolic link for anyiproutectl
   command: ln -sf /var/lib/vmware/anyiproutectl.sh /usr/local/bin/anyiproutectl
@@ -174,14 +185,17 @@
     group: root
     mode: "0644"
 
-- name: Check if routetablectl exists
-  ansible.builtin.stat:
-    path: /usr/local/bin/routetablectl
-  register: route_script
-
 - name: Create symbolic link for routetablectl
   command: ln -sf /var/lib/vmware/routetablectl.sh /usr/local/bin/routetablectl
   when: not route_script.stat.exists
+
+- name: Apply new VIP CIDR routes
+  command: anyiproutectl up
+  when: anyip_script.stat.exists
+
+- name: Apply new routing tables
+  command: routetablectl up
+  when: route_script.stat.exists
 
 - name: Ensure anyip-routes service is restarted successfully
   systemd:
