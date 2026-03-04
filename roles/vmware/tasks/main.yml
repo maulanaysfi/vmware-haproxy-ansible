@@ -22,6 +22,7 @@
     owner: systemd-network
     group: systemd-network
     mode: "0644"
+  when: ansible_default_ipv4.alias != "management"
 
 - name: Copy workload network link configuration
   copy:
@@ -30,6 +31,7 @@
     owner: systemd-network
     group: systemd-network
     mode: "0644"
+  when: ansible_workload is undefined
 
 - name: Copy frontend network link configuration
   copy:
@@ -38,10 +40,12 @@
     owner: systemd-network
     group: systemd-network
     mode: "0644"
+  when: ansible_frontend is undefined
 
 - name: Generate new initrd image containing our link files
   shell:
     cmd: /usr/bin/dracut --add network --rebuild /boot/initrd.img-$(uname -r)
+  when: ansible_default_ipv4.alias != "management"
 
 - name: Copy frontend network configuration
   template:
@@ -89,13 +93,13 @@
 - name: Retrieve management MAC Address
   debug: msg="{{ hostvars[inventory_hostname].ansible_workload.macaddress }}"
 
-- name: Create anyip-routes service configuration file
-  copy:
-    src: files/etc/vmware/anyip-routes.cfg
-    dest: /etc/vmware/anyip-routes.cfg
-    owner: root
-    group: root
-    mode: "0644"
+#- name: Create anyip-routes service configuration file
+#  copy:
+#    src: files/etc/vmware/anyip-routes.cfg
+#    dest: /etc/vmware/anyip-routes.cfg
+#    owner: root
+#    group: root
+#    mode: "0644"
 
 - name: Create anyiproutectl script
   copy:
@@ -120,19 +124,36 @@
     daemon_reload: yes
     state: stopped
 
-- name: Insert frontend VIP CIDR to anyip-routes.cfg
-  lineinfile:
-    path: /etc/vmware/anyip-routes.cfg
-    line: "{{ frontend_vip_cidr }}"
-    state: present
+#- name: Insert frontend VIP CIDR to anyip-routes.cfg
+#  lineinfile:
+#    path: /etc/vmware/anyip-routes.cfg
+#    line: "{{ frontend_vip_cidr }}"
+#    state: present
 
-- name: Create route-table service configuration file
-  copy:
-    src: files/etc/vmware/route-tables.cfg
-    dest: /etc/vmware/route-tables.cfg
+- name: Generate frontend VIP CIDR to anyip-routes.cfg using template
+  template:
+    src: anyiproute.j2
+    dest: /etc/vmware/anyip-routes.cfg
     owner: root
     group: root
     mode: "0644"
+
+- name: Check if anyiproutectl exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/anyiproutectl
+  register: anyip_script
+
+- name: Create symbolic link for anyiproutectl
+  command: ln -sf /var/lib/vmware/anyiproutectl.sh /usr/local/bin/anyiproutectl
+  when: not anyip_script.stat.exists
+
+#- name: Create route-table service configuration file
+#  copy:
+#    src: files/etc/vmware/route-tables.cfg
+#    dest: /etc/vmware/route-tables.cfg
+#    owner: root
+#    group: root
+#    mode: "0644"
 
 - name: Create routetablectl script
   copy:
@@ -157,15 +178,32 @@
     daemon_reload: yes
     state: stopped
 
-- name: Insert routing table to route-tables.cfg
-  blockinfile:
-    path: /etc/vmware/route-tables.cfg
-    block: |
-      2,workload,{{ ansible_workload.macaddress }},{{ workload_ipv4_cidr }},{{ workload_gtw }}
-      2,workload,{{ ansible_workload.macaddress }},{{ workload_ipv4_cidr }}
-      3,frontend,{{ ansible_frontend.macaddress }},{{ frontend_ipv4_cidr }},{{ frontend_gtw }}
-      3,frontend,{{ ansible_frontend.macaddress }},{{ frontend_ipv4_cidr }}
-    create: true
+#- name: Insert routing table to route-tables.cfg
+#  blockinfile:
+#    path: /etc/vmware/route-tables.cfg
+#    block: |
+#      2,workload,{{ ansible_workload.macaddress }},{{ workload_ipv4_cidr }},{{ workload_gtw }}
+#      2,workload,{{ ansible_workload.macaddress }},{{ workload_ipv4_cidr }}
+#      3,frontend,{{ ansible_frontend.macaddress }},{{ frontend_ipv4_cidr }},{{ frontend_gtw }}
+#      3,frontend,{{ ansible_frontend.macaddress }},{{ frontend_ipv4_cidr }}
+#    create: true
+
+- name: Generate route table to route-tables.cfg using template
+  template:
+    src: routetable.j2
+    dest: /etc/vmware/route-tables.cfg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Check if routetablectl exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/routetablectl
+  register: route_script
+
+- name: Create symbolic link for routetablectl
+  command: ln -sf /var/lib/vmware/routetablectl.sh /usr/local/bin/routetablectl
+  when: not route_script.stat.exists
 
 - name: Ensure anyip-routes service is restarted successfully
   systemd:

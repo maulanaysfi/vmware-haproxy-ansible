@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
+- name: Check if DataPlane API binary file exists
+  ansible.builtin.stat:
+    path: /root/dataplaneapi_2.9.21_linux_amd64.rpm
+  register: dataplaneapi_binary
+
 - name: Download DataPlane API
   get_url:
     url: "{{ dataplaneapi_binary_url }}"
     dest: /root/dataplaneapi_2.9.21_linux_amd64.rpm
     mode: "0755"
+  when: not dataplaneapi_binary.stat.exists
 
 - name: Install latest HAProxy
   shell: |
@@ -26,6 +32,11 @@
   shell: |
     rpm -Uvh /root/dataplaneapi_2.9.21_linux_amd64.rpm || true
 
+- name: Check if DataPlane API configuration file exists
+  ansible.builtin.stat:
+    path: /etc/haproxy/dataplaneapi.yml
+  register: dataplaneapi_config
+
 - name: Create Data Plane API configuration file
   copy:
     src: files/etc/haproxy/dataplaneapi.yml
@@ -33,6 +44,12 @@
     owner: root
     group: root
     mode: "0644"
+  when: not dataplaneapi_config.stat.exists
+
+- name: Check if HAProxy configuration file exists
+  ansible.builtin.stat:
+    path: /etc/haproxy/haproxy.cfg
+  register: haproxy_config
 
 - name: Create HAProxy configuration file
   copy:
@@ -41,6 +58,7 @@
     owner: root
     group: root
     mode: "0644"
+  when: not haproxy_config.stat.exists
 
 - name: Set Dataplane API default configuration dir
   copy:
