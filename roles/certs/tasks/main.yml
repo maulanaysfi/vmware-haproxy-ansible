@@ -1,5 +1,66 @@
 ---
-- name: Ensure directories exist
+- name: Ensure CA directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - "{{ ca_cert_path }}"
+    - "{{ ca_key_path }}"
+
+- name: Check if Private CA Key file exists
+  stat:
+    path: "{{ ca_key_path }}/{{ ca_cert_name }}.key"
+  register: ca_key
+
+- name: Generate Private CA Key
+  community.crypto.openssl_privatekey:
+    path: "{{ ca_key_path }}/{{ ca_cert_name }}.key"
+    size: 4096
+    type: RSA
+    mode: '0600'
+  when: not ca_key.stat.exists
+
+- name: Check if CA CSR file exists
+  stat:
+    path: "{{ ca_cert_path }}/{{ ca_cert_name }}.csr"
+  register: ca_csr
+
+- name: Create CSR for CA
+  community.crypto.openssl_csr:
+    path: "{{ ca_cert_path }}/{{ ca_cert_name }}.csr"
+    privatekey_path: "{{ ca_key_path }}/{{ ca_cert_name }}.key"
+    common_name: "{{ ca_common_name }}"
+    organization_name: "{{ ca_org_name }}"
+    organizational_unit_name: "{{ ca_org_unit_name }}"
+    country_name: "{{ ca_country }}"
+    state_or_province_name: "{{ ca_state }}"
+    locality_name: "{{ ca_locality }}"
+    basic_constraints:
+      - "CA:TRUE"
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+      - cRLSign
+    key_usage_critical: true
+  when: not ca_csr.stat.exists
+
+- name: Check if CA Cert file exists
+  stat:
+    path: "{{ ca_cert_path }}/{{ ca_cert_name }}.crt"
+  register: ca_crt
+
+- name: Sign the CA Certificate
+  community.crypto.x509_certificate:
+    path: "{{ ca_cert_path }}/{{ ca_cert_name }}.crt"
+    csr_path: "{{ ca_cert_path }}/{{ ca_cert_name }}.csr"
+    privatekey_path: "{{ ca_key_path }}/{{ ca_cert_name }}.key"
+    provider: selfsigned
+    selfsigned_not_after: "{{ ca_valid_days }}"
+    mode: '0644'
+  when: not ca_crt.stat.exists
+
+- name: Ensure Cert directories exist
   file:
     path: "{{ item }}"
     state: directory
@@ -9,7 +70,7 @@
     - "{{ ssl_key_path }}"
 
 - name: Check if Private Key file exists
-  ansible.builtin.stat:
+  stat:
     path: "{{ ssl_key_path }}/{{ ssl_cert_name }}.key"
   register: key
 
@@ -27,13 +88,13 @@
     privatekey_path: "{{ ssl_key_path }}/{{ ssl_cert_name }}.key"
     common_name: "{{ ssl_common_name }}"
     organization_name: "{{ ssl_org_name }}"
+    organizational_unit_name: "{{ ssl_org_unit_name }}"
     country_name: "{{ ssl_country }}"
     state_or_province_name: "{{ ssl_state }}"
     locality_name: "{{ ssl_locality }}"
     subject_alt_name: >-
       {{ (ssl_dns_alt_names | map('regex_replace', '^', 'DNS:') | list) +
-         ['IP:' + management_ipv4, 'IP:' + frontend_ipv4, 'IP:' + workload_ipv4] }}
-
+      ['IP:127.0.0.1', 'IP:' + management_ipv4, 'IP:' + frontend_ipv4, 'IP:' + workload_ipv4] }}
     key_usage:
       - digitalSignature
       - keyEncipherment
@@ -45,8 +106,10 @@
     path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.crt"
     csr_path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.csr"
     privatekey_path: "{{ ssl_key_path }}/{{ ssl_cert_name }}.key"
-    provider: selfsigned
-    selfsigned_not_after: "{{ ssl_valid_days }}"
+    ownca_path: "{{ ca_cert_path }}/{{ ca_cert_name }}.crt"
+    ownca_privatekey_path: "{{ ca_key_path }}/{{ ca_cert_name }}.key"
+    provider: ownca
+    ownca_not_after: "{{ ssl_valid_days }}"
     mode: '0644'
 
 - name: Combine Key and Cert using shell
