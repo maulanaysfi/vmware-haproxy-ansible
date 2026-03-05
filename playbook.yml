@@ -2,11 +2,8 @@
 - hosts: all
   become: yes
   roles:
-  - role: common
-  - role: haproxy
-  - role: certs
-  - role: vmware
-#  - role: route
-#  - role: cloudinit
-#  - role: pki
-#  - role: sysprep
+  #- role: common
+  #- role: haproxy
+  #- role: certs
+  #- role: vmware
+  - role: sysprep

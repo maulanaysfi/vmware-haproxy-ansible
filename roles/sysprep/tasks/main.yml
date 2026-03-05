@@ -1,0 +1,108 @@
+---
+- name: Reset hosts file
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Truncate hostname file
+  file:
+    state: "{{ item.state }}"
+    path: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+  - { path: /etc/hostname, state: absent, mode: "0644" }
+  - { path: /etc/hostname, state: touch,  mode: "0644" }
+
+- name: Remove tdnf package caches
+  command: /usr/bin/tdnf -y clean all
+
+- name: Truncate machine id
+  file:
+    state: "{{ item.state }}"
+    path: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+  - { path: /etc/machine-id, state: absent, mode: "0444" }
+  - { path: /etc/machine-id, state: touch,  mode: "0444" }
+
+- name: Truncate audit logs
+  file:
+    state: "{{ item.state }}"
+    path: "{{ item.path }}"
+    owner: root
+    group: utmp
+    mode: "{{ item.mode }}"
+  loop:
+  - { path: /var/log/wtmp,    state: absent, mode: "0664" }
+  - { path: /var/log/lastlog, state: absent, mode: "0664" }
+  - { path: /var/log/wtmp,    state: touch,  mode: "0664" }
+  - { path: /var/log/lastlog, state: touch,  mode: "0664" }
+
+- name: Find temp files
+  find:
+    depth: 1
+    file_type: any
+    paths:
+    - /tmp
+    - /var/tmp
+    pattern: '*'
+  register: temp_files
+
+- name: Reset temp space
+  file:
+    state: absent
+    path: "{{ item.path }}"
+  loop: "{{ temp_files.files }}"
+
+- name: Find SSH host keys
+  find:
+    paths:
+    - /etc/ssh
+    pattern: 'ssh_host_*'
+  register: ssh_host_keys
+
+- name: Remove SSH host keys
+  file:
+    state: absent
+    path: "{{ item.path }}"
+  loop: "{{ ssh_host_keys.files }}"
+
+- name: Remove SSH authorized users
+  file:
+    state: absent
+    path: "{{ item.path }}"
+  loop:
+  - { path: /root/.ssh/authorized_keys }
+  - { path: "{{ ansible_user_dir }}/.ssh/authorized_keys" }
+
+- name: Remove and recreate /var/log
+  file:
+    state: "{{ item.state }}"
+    path: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: 0755
+  loop:
+  - { path: /var/log, state: absent }
+  - { path: /var/log, state: directory }
+
+- name: Truncate shell history
+  file:
+    state: absent
+    path: "{{ item.path }}"
+  loop:
+  - { path: /root/.bash_history }
+  - { path: "{{ ansible_user_dir }}/.bash_history" }
+
+- name: Reboot system to regenerate new SSH Identity
+  shell: reboot -h now
+  async: 1
+  poll: 0
+  ignore_errors: true
