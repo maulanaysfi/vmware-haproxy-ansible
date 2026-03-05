@@ -61,6 +61,18 @@
     path: "{{ item.path }}"
   loop: "{{ temp_files.files }}"
 
+- name: Set SSH Bind address to only listen on Management IPv4
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?#ListenAddress 0.0.0.0$'
+    line: "ListenAddress {{ management_ipv4 }}"
+    state: present
+
+- name: Restart sshd service
+  systemd:
+    name: sshd
+    state: restarted
+
 - name: Find SSH host keys
   find:
     paths:
