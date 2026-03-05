@@ -82,6 +82,11 @@
     mode: '0600'
   when: not key.stat.exists
 
+- name: Check if CSR file exists
+  stat:
+    path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.csr"
+  register: csr
+
 - name: Generate CSR with v3 extensions
   community.crypto.openssl_csr:
     path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.csr"
@@ -100,6 +105,12 @@
       - keyEncipherment
     extended_key_usage:
       - serverAuth
+  when: not csr.stat.exists
+
+- name: Check if Cert file exists
+  stat:
+    path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.crt"
+  register: crt
 
 - name: Generate Self-Signed Certificate
   community.crypto.x509_certificate:
@@ -111,11 +122,18 @@
     provider: ownca
     ownca_not_after: "{{ ssl_valid_days }}"
     mode: '0644'
+  when: not crt.stat.exists
+
+- name: Check if Cert.pem file exists
+  stat:
+    path: "{{ ssl_cert_path }}/{{ ssl_cert_name }}.crt"
+  register: crt_pem
 
 - name: Combine Key and Cert using shell
   shell: |
     cat {{ ssl_key_path }}/{{ ssl_cert_name }}.key {{ ssl_cert_path }}/{{ ssl_cert_name }}.crt > {{ ssl_cert_path }}/{{ ssl_cert_name }}.pem
     chmod 600 {{ ssl_cert_path }}/{{ ssl_cert_name }}.pem
+  when: not crt_pem.stat.exists
 
 - name: Restart haproxy.service
   systemd:
