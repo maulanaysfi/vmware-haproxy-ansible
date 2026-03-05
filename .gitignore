@@ -1,1 +1,8 @@
+inventory
 .ssh/
+placeholder/
+roles/vmware/defaults/main.yml
+roles/common/defaults/main.yml
+roles/sysprep/defaults/main.yml
+roles/certs/defaults/main.yml
+roles/haproxy/defaults/main.yml
