@@ -1,2 +1,56 @@
 ---
+# Common defaults
 sysctl_conf_file: "{{ '/etc/sysctl.d/99-sysctl.conf' if ansible_os_family == 'VMware Photon OS' else '/etc/sysctl.conf' }}"
+
+# CA Certs
+ca_cert_path: "/etc/haproxy/ca"
+ca_key_path: "/etc/haproxy/ca"
+ca_cert_name: "ca"
+ca_common_name: "192.168.1.23"
+ca_org_name: "PT. Adalah Pokoknya"
+ca_org_unit_name: "Infra"
+ca_country: "ID"
+ca_state: "Jawa Barat"
+ca_locality: "Depok Barat"
+
+ca_valid_days: "+3650d"
+
+# Server Certs
+ssl_cert_path: "/etc/haproxy/certs"
+ssl_key_path: "/etc/haproxy/private"
+ssl_cert_name: "server"
+ssl_common_name: "meow"
+ssl_org_name: "PT. Adalah Pokoknya"
+ssl_org_unit_name: "Infra"
+ssl_country: "ID"
+ssl_state: "Jawa Barat"
+ssl_locality: "Depok Barat"
+
+# v3 Extensions
+ssl_dns_alt_names:
+  - "meow"
+  - "localhost"
+
+ssl_valid_days: "+1825d"
+
+# addresses and routings
+hostname_fqdn: meow
+management_ipv4: 192.168.1.23
+workload_ipv4: 10.10.20.231
+frontend_ipv4: 10.10.30.231
+
+management_ipv4_cidr: 192.168.1.23/24
+management_dns: 1.1.1.1
+management_gtw: 192.168.1.254
+
+workload_ipv4_cidr: 10.10.20.231/24
+workload_gtw: 10.10.20.254
+
+frontend_ipv4_cidr: 10.10.30.231/24
+frontend_gtw: 10.10.30.254
+
+frontend_vip_cidr: 10.10.30.192/28
+
+# dataplaneapi credentials
+dpapi_username: dataplaneapi
+dpapi_password_hash: $5$1sC/y1Od5mO0xlzR$QA3rWkjkBvq6HE9.6x1e9gOxKeEmYlBAEgkVNVUPJm1
