@@ -65,7 +65,7 @@
     mode: '0755'
 
 - name: Disable and Stop Iptables service
-  systemd:
+  systemd_service:
     name: iptables
-    enabled: no
+    enabled: false
     state: stopped

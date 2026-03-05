@@ -2,8 +2,8 @@
 - hosts: all
   become: yes
   roles:
-  #- role: common
-  #- role: haproxy
-  #- role: certs
-  #- role: vmware
+  - role: common
+  - role: haproxy
+  - role: certs
+  - role: vmware
   - role: sysprep
